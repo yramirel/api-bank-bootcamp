@@ -1,5 +1,8 @@
 package com.bank.Model;
 
+import java.io.Serializable;
+import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -10,12 +13,8 @@ import java.io.Serializable;
 @AllArgsConstructor
 @Data
 @Builder
-public class Client implements Serializable {
+public class TypeClient implements Serializable {
     private int id;
-    private String first_name;
-    private String last_name;
-    private String document_number;
-    private String type_client_id;//natural, juridica
-    private int signature;
+    private String name;
     private int state;
 }
