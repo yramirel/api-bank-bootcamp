@@ -16,7 +16,7 @@ import java.io.Serializable;
 @Builder
 public class TypeClient implements Serializable {
     @Id
-    private int id;
+    private String id;
     private String name;
     private int state;
 }

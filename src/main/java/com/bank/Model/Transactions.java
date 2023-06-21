@@ -5,7 +5,9 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
+import org.springframework.data.mongodb.core.mapping.Field;
 
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Document(value = "transaction")
@@ -14,12 +16,14 @@ import java.time.LocalDateTime;
 @Builder
 public class Transactions {
     @Id
-    private Integer id;
+    private String id;
 	@DocumentReference(lazy = true)
     private Client client;
     private LocalDateTime date;
-    private String type_transaction;//deposito,retiro,
+    @Field("type_transaction")
+    private String typeTransaction;//deposito,retiro,
 	@DocumentReference(lazy = true)
-    private ClientProduct client_product;
+    private ClientProduct clientProduct;
+    private BigDecimal amount;
     private int state;
 }

@@ -6,6 +6,7 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.io.Serializable;
 @Document(value = "client")
@@ -14,12 +15,12 @@ import java.io.Serializable;
 @Builder
 public class Client implements Serializable {
     @Id
-    private Integer id;
-    private String first_name;
-    private String last_name;
-    private String document_number;
+    private String id;
+    private String name;
+    @Field("document_number")
+    private String documentNumber;
 	@DocumentReference(lazy = true)
-    private TypeClient typeClient;//natural, juridica
+    private TypeClient type_client;//natural, juridica
     private int signature;
     private int state;
 }

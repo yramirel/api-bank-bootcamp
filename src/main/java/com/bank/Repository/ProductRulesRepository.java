@@ -1,7 +1,9 @@
 package com.bank.Repository;
 
 import com.bank.Model.ProductRules;
-import org.springframework.data.repository.reactive.RxJava3CrudRepository;
+import org.springframework.data.mongodb.repository.ReactiveMongoRepository;
+import org.springframework.stereotype.Repository;
 
-public interface ProductRulesRepository extends RxJava3CrudRepository<ProductRules,Integer> {
+@Repository
+public interface ProductRulesRepository extends ReactiveMongoRepository<ProductRules,String> {
 }

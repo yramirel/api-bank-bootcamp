@@ -13,9 +13,8 @@ import java.io.Serializable;
 @Builder
 public class Product implements Serializable{
     @Id
-    private Integer id;
+    private String id;
     private String type_product;//pasivo,activo
     private String name;
-    private String card_number;
     private int state;
 }

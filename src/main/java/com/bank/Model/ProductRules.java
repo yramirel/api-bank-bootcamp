@@ -15,7 +15,7 @@ import java.math.BigDecimal;
 @Builder
 public class ProductRules implements Serializable{
     @Id
-    private Integer id;
+    private String id;
     @DocumentReference(lazy = true)
     private TypeClient typeClient;
     @DocumentReference(lazy = true)
