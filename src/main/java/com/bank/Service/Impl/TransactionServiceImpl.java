@@ -12,6 +12,7 @@ import com.bank.Service.TransactionsService;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -57,11 +58,24 @@ public class TransactionServiceImpl implements TransactionsService {
             clientProductUpdate.setBalance(balance.subtract(amount));
             clientProductRepository.save(clientProductUpdate).subscribe();
         }else{
-            System.out.println("credito no disponible");
+            System.out.println("operacion no soportada");
         }
     }
     @Override
-    public Flowable<Transactions> getTransactionsByClientName(String name) throws Exception{
+    public Flowable<Transactions> getTransactionsByClientProduct(String name) throws Exception{
+
         return null;
+    }
+    @Override
+    public Single<BigDecimal> getBalanceByClientProduct(String account_number) throws Exception{
+        Flowable<ClientProduct> clientProductSingle=clientProductRepository.listAllClientProduct();
+        clientProductSingle=clientProductSingle.filter(item->{
+            System.out.println(item);
+            return item.getAccountNumber().equals(account_number);
+        });
+        Single<BigDecimal> response=clientProductSingle.map(item->{
+            return Single.just(item.getBalance());
+        }).blockingFirst();
+        return response;
     }
 }
