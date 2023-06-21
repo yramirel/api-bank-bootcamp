@@ -2,7 +2,9 @@ package com.bank.Model;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.DocumentReference;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -12,9 +14,12 @@ import java.math.BigDecimal;
 @Data
 @Builder
 public class ProductRules implements Serializable{
-    private int id;
-    private Integer type_client_id;
-    private Integer product_id;
+    @Id
+    private Integer id;
+    @DocumentReference(lazy = true)
+    private TypeClient typeClient;
+    @DocumentReference(lazy = true)
+    private Product product;
     private Integer max_account;
     private BigDecimal cost_maintenance;
     private Integer max_deposits;

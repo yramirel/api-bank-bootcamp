@@ -6,14 +6,16 @@ import java.time.LocalDateTime;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
-@Document(value = "client")
+@Document(value = "type_client")
 @AllArgsConstructor
 @Data
 @Builder
 public class TypeClient implements Serializable {
+    @Id
     private int id;
     private String name;
     private int state;
