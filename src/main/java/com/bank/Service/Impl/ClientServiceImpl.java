@@ -6,11 +6,13 @@ import com.bank.Repository.ClientRepository;
 import com.bank.Repository.ProductRepository;
 import com.bank.Repository.TypeClientRepository;
 import com.bank.Service.ClientService;
+import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Map;
+import java.util.concurrent.Flow;
 
 @Service
 public class ClientServiceImpl implements ClientService {
@@ -27,8 +29,18 @@ public class ClientServiceImpl implements ClientService {
                 .documentNumber(params.get("document_number").toString())
                 .signature(Integer.parseInt(params.get("signature").toString()))
                 .state(1)
-                .type_client(typeClient.blockingGet())
+                .typeClient(typeClient.blockingGet())
                 .build();
         clientRepository.save(client).subscribe();
+    }
+
+    @Override
+    public Single<Client> getClient(String document_number) throws Exception{
+        return this.clientRepository.getByDocumentNumber(document_number);
+    }
+
+    @Override
+    public Flowable<Client> listClient(String document_number) throws Exception{
+        return this.clientRepository.getByTypeClientContaining();
     }
 }

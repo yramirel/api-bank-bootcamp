@@ -5,6 +5,7 @@ import com.bank.Service.TransactionsService;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Single;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
@@ -28,6 +29,7 @@ public class TransactionController {
         return transactions;
     }
     @RequestMapping(value ="/balance/{account_number}")
+    @ResponseStatus(HttpStatus.OK)
     public Single<BigDecimal> listTransactions(@PathVariable(value = "account_number") String account_number) {
         Single<BigDecimal> balance=Single.just(BigDecimal.ZERO);
         try {
@@ -38,6 +40,7 @@ public class TransactionController {
         return balance;
     }
     @PostMapping(value ="/transaction")
+    @ResponseStatus(HttpStatus.CREATED)
     public void saveClient(@RequestBody Map params) {
         try {
             transactionService.saveTransaction(params);

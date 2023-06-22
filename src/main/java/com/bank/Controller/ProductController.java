@@ -5,6 +5,7 @@ import com.bank.Service.ProductRulesService;
 import com.bank.Service.ProductService;
 import io.reactivex.rxjava3.core.Flowable;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
@@ -21,6 +22,7 @@ public class ProductController {
     private ProductRulesService productRulesService;
 
     @RequestMapping(value ="/products" , produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @ResponseStatus(HttpStatus.OK)
     public Flowable<Product> listProducts() {
         Flowable<Product> products=null;
         try {
@@ -32,6 +34,7 @@ public class ProductController {
     }
 
     @RequestMapping(value ="/saveProductRules" , produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @ResponseStatus(HttpStatus.CREATED)
     public void saveProductRules() {
 
         try {
@@ -41,6 +44,7 @@ public class ProductController {
         }
     }
     @PostMapping(value ="/clientproduct")
+    @ResponseStatus(HttpStatus.CREATED)
     public void saveClient(@RequestBody Map params) {
         try {
             productService.saveClientProduct(params);

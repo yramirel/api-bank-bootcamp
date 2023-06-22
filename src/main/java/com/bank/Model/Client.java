@@ -20,7 +20,8 @@ public class Client implements Serializable {
     @Field("document_number")
     private String documentNumber;
 	@DocumentReference(lazy = true)
-    private TypeClient type_client;//natural, juridica
+    @Field("type_client")
+    private TypeClient typeClient;//natural, juridica
     private int signature;
     private int state;
 }
