@@ -13,5 +13,5 @@ import org.springframework.stereotype.Repository;
 public interface ClientRepository  extends ReactiveMongoRepository<Client,String> {
     Single<Client> getByDocumentNumber(String document_number);
 
-    Flowable<Client> getByTypeClientContaining();
+    Flowable<Client> getByShippingTypeClient();
 }

@@ -41,6 +41,6 @@ public class ClientServiceImpl implements ClientService {
 
     @Override
     public Flowable<Client> listClient(String document_number) throws Exception{
-        return this.clientRepository.getByTypeClientContaining();
+        return this.clientRepository.getByShippingTypeClient();
     }
 }
