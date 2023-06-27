@@ -10,6 +10,7 @@ import com.bank.Repository.ProductRepository;
 import com.bank.Repository.TransactionRepository;
 import com.bank.Service.TransactionsService;
 import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
@@ -28,7 +29,7 @@ public class TransactionServiceImpl implements TransactionsService {
     private ClientProductRepository clientProductRepository;
     @Override
     public void saveTransaction(Map params) throws Exception{
-        Single<Client> client = clientRepository.getByDocumentNumber(params.get("document_number").toString());
+        Maybe<Client> client = clientRepository.getByDocumentNumber(params.get("document_number").toString());
         Single<ClientProduct> clientProduct = clientProductRepository.getByAccountNumber(params.get("account_number").toString());
         String typeTransaction=params.get("type_transaction").toString();
 

@@ -17,12 +17,11 @@ import java.time.LocalDateTime;
 public class Transactions {
     @Id
     private String id;
-	@DocumentReference(lazy = true)
     private Client client;
     private LocalDateTime date;
     @Field("type_transaction")
     private String typeTransaction;//deposito,retiro,
-	@DocumentReference(lazy = true)
+    @Field("client_product")
     private ClientProduct clientProduct;
     private BigDecimal amount;
     private int state;

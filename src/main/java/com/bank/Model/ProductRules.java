@@ -5,6 +5,7 @@ import lombok.Data;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
+import org.springframework.data.mongodb.core.mapping.Field;
 
 import java.io.Serializable;
 import java.math.BigDecimal;
@@ -16,9 +17,8 @@ import java.math.BigDecimal;
 public class ProductRules implements Serializable{
     @Id
     private String id;
-    @DocumentReference(lazy = true)
+    @Field("type_client")
     private TypeClient typeClient;
-    @DocumentReference(lazy = true)
     private Product product;
     private Integer max_account;
     private BigDecimal cost_maintenance;

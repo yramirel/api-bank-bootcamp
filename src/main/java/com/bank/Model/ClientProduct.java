@@ -18,9 +18,7 @@ import java.time.LocalDateTime;
 public class ClientProduct implements Serializable{
     @Id
     private String id;
-    @DocumentReference(lazy = true)
     private Product product;
-    @DocumentReference(lazy = true)
     private Client client;
     @Field("account_number")
     private String accountNumber;

@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.DocumentReference;
 import org.springframework.data.mongodb.core.mapping.Field;
 
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 @Document(value = "client")
 @AllArgsConstructor
@@ -16,12 +17,11 @@ import java.io.Serializable;
 public class Client implements Serializable {
     @Id
     private String id;
+    @NotBlank
     private String name;
-    @Field("document_number")
+    @NotBlank
     private String documentNumber;
-	@DocumentReference(lazy = true)
-    @Field("type_client")
-    private TypeClient typeClient;//natural, juridica
+    private int typeClient;//natural, juridica
     private int signature;
     private int state;
 }

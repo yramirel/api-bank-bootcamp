@@ -9,6 +9,7 @@ import com.bank.Repository.ClientRepository;
 import com.bank.Repository.ProductRepository;
 import com.bank.Service.ProductService;
 import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -34,7 +35,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void saveClientProduct(Map params) throws Exception{
         try {
-            Single<Client> client = clientRepository.getByDocumentNumber(params.get("document_number").toString());
+            Maybe<Client> client = clientRepository.getByDocumentNumber(params.get("document_number").toString());
             Single<Product> product = productRepository.getByName(params.get("product_name").toString());
             ClientProduct clientProduct=ClientProduct.builder()
                     .client(client.blockingGet())

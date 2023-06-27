@@ -1,12 +1,15 @@
 package com.bank.Service.Impl;
 
+import com.bank.ErrorHandler.ConflictException;
 import com.bank.Model.Client;
+import com.bank.Model.Request.ClientRequest;
 import com.bank.Model.TypeClient;
 import com.bank.Repository.ClientRepository;
 import com.bank.Repository.ProductRepository;
 import com.bank.Repository.TypeClientRepository;
 import com.bank.Service.ClientService;
 import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -22,20 +25,24 @@ public class ClientServiceImpl implements ClientService {
     @Autowired
     private TypeClientRepository typeClientRepository;
     @Override
-    public void saveClient(Map params) throws Exception{
-        Single<TypeClient> typeClient = typeClientRepository.getByName(params.get("type_client").toString());
-        Client client= Client.builder()
-                .name(params.get("name").toString())
-                .documentNumber(params.get("document_number").toString())
-                .signature(Integer.parseInt(params.get("signature").toString()))
-                .state(1)
-                .typeClient(typeClient.blockingGet())
-                .build();
-        clientRepository.save(client).subscribe();
+    public Maybe<Client> saveClient(ClientRequest client){
+        return clientRepository.getByDocumentNumber(client.getDocumentNumber()).isEmpty()
+                .flatMap(isEmpty->{
+                    client.setState(1);
+                    return isEmpty?clientRepository.save(client.toClient())
+                            :Single.error(new ClassCastException("Error"));
+                }).toMaybe();
     }
-
     @Override
-    public Single<Client> getClient(String document_number) throws Exception{
+    public Maybe<Client> deleteClient(String document_number){
+        return clientRepository.getByDocumentNumber(document_number).toSingle()
+                .flatMap(client->{
+                    client.setState(0);
+                    return clientRepository.save(client);
+                }).toMaybe();
+    }
+    @Override
+    public Maybe<Client> getClient(String document_number) throws Exception{
         return this.clientRepository.getByDocumentNumber(document_number);
     }
 
