@@ -19,11 +19,11 @@ public class ClientProduct implements Serializable{
     @Id
     private String id;
     private Product product;
+    private String codeProduct;
     private Client client;
-    @Field("account_number")
+    private String documentNumber;
     private String accountNumber;
     private LocalDateTime date;
-    @Field("credit_limit")
     private BigDecimal creditLimit;
     private BigDecimal balance;
     private int state;

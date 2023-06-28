@@ -3,10 +3,7 @@ package com.bank.Service.Impl;
 import com.bank.ErrorHandler.ConflictException;
 import com.bank.Model.Client;
 import com.bank.Model.Request.ClientRequest;
-import com.bank.Model.TypeClient;
 import com.bank.Repository.ClientRepository;
-import com.bank.Repository.ProductRepository;
-import com.bank.Repository.TypeClientRepository;
 import com.bank.Service.ClientService;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Maybe;
@@ -14,23 +11,18 @@ import io.reactivex.rxjava3.core.Single;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
-import java.util.concurrent.Flow;
-
 @Service
 public class ClientServiceImpl implements ClientService {
     @Autowired
     private ClientRepository clientRepository;
 
-    @Autowired
-    private TypeClientRepository typeClientRepository;
     @Override
     public Maybe<Client> saveClient(ClientRequest client){
         return clientRepository.getByDocumentNumber(client.getDocumentNumber()).isEmpty()
                 .flatMap(isEmpty->{
                     client.setState(1);
                     return isEmpty?clientRepository.save(client.toClient())
-                            :Single.error(new ClassCastException("Error"));
+                            :Single.error(new ConflictException("Error"));
                 }).toMaybe();
     }
     @Override

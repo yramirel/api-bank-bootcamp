@@ -1,8 +1,11 @@
 package com.bank.Controller;
 
+import com.bank.Model.Client;
+import com.bank.Model.Request.TransactionsRequest;
 import com.bank.Model.Transactions;
 import com.bank.Service.TransactionsService;
 import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -30,10 +33,10 @@ public class TransactionController {
     }
     @RequestMapping(value ="/balance/{account_number}")
     @ResponseStatus(HttpStatus.OK)
-    public Single<BigDecimal> listTransactions(@PathVariable(value = "account_number") String account_number) {
+    public Single<BigDecimal> getBalanceByClientProduct(@PathVariable(value = "accountNumber") String accountNumber) {
         Single<BigDecimal> balance=Single.just(BigDecimal.ZERO);
         try {
-            balance= transactionService.getBalanceByClientProduct(account_number);
+            balance= transactionService.getBalanceByClientProduct(accountNumber);
         }catch (Exception e){
             System.out.println(e.getMessage());
         }
@@ -41,11 +44,23 @@ public class TransactionController {
     }
     @PostMapping(value ="/transaction")
     @ResponseStatus(HttpStatus.CREATED)
-    public void saveClient(@RequestBody Map params) {
+    public Maybe<Transactions> saveTransaction(@RequestBody TransactionsRequest transactionsRequest) {
+        Maybe<Transactions> transactions=null;
         try {
-            transactionService.saveTransaction(params);
+            transactions=transactionService.saveTransaction(transactionsRequest);
         }catch (Exception e){
             System.out.println(e.getMessage());
         }
+        return transactions;
+    }
+    @RequestMapping(value ="/transactions/{accountNumber}" , produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flowable<Transactions> listTransactionsByAccountNumber(@PathVariable(value = "accountNumber") String accountNumber) {
+        Flowable<Transactions> transactions=null;
+        try {
+            transactions= transactionService.getTransactionsByAccountNumber(accountNumber);
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+        return transactions;
     }
 }

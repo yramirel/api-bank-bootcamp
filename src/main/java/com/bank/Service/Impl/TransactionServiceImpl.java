@@ -1,13 +1,9 @@
 package com.bank.Service.Impl;
 
-import com.bank.Model.Client;
-import com.bank.Model.ClientProduct;
-import com.bank.Model.Product;
-import com.bank.Model.Transactions;
-import com.bank.Repository.ClientProductRepository;
-import com.bank.Repository.ClientRepository;
-import com.bank.Repository.ProductRepository;
-import com.bank.Repository.TransactionRepository;
+import com.bank.ErrorHandler.ConflictException;
+import com.bank.Model.*;
+import com.bank.Model.Request.TransactionsRequest;
+import com.bank.Repository.*;
 import com.bank.Service.TransactionsService;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Maybe;
@@ -17,6 +13,7 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 import java.util.Map;
 
 @Service
@@ -27,9 +24,38 @@ public class TransactionServiceImpl implements TransactionsService {
     private ClientRepository clientRepository;
     @Autowired
     private ClientProductRepository clientProductRepository;
+    @Autowired
+    private ProductRulesRepository productRulesRepository;
     @Override
-    public void saveTransaction(Map params) throws Exception{
-        Maybe<Client> client = clientRepository.getByDocumentNumber(params.get("document_number").toString());
+    public Maybe<Transactions> saveTransaction(TransactionsRequest transactionsRequest) throws Exception{
+        return clientRepository.getByDocumentNumber(transactionsRequest.getDocumentNumber()).toSingle()
+                .flatMap(client -> {
+                    ClientProduct clientProduct = clientProductRepository.getByAccountNumber(transactionsRequest.getAccountNumber()).blockingGet();
+                    ProductRules productRules=productRulesRepository.getByCodeProduct(clientProduct.getCodeProduct()).blockingGet();
+
+                    BigDecimal balance=clientProduct.getBalance();
+                    BigDecimal amount=transactionsRequest.getAmount();
+
+                    if(transactionsRequest.getTypeTransaction().equals("deposito")){
+
+                    }else if(transactionsRequest.getTypeTransaction().equals("retiro") && balance.compareTo(amount)==1){
+
+                    }else if(transactionsRequest.getTypeTransaction().equals("consumo") && clientProduct.getCreditLimit().compareTo(amount)==1){
+
+                    }else if(transactionsRequest.getTypeTransaction().equals("pagos")){
+
+                    }else{
+                        return Single.error(new ConflictException("Transaccion no soportada"));
+                    }
+                    Transactions transactions= transactionsRequest.toTransactions();
+                    transactions.setClient(client);
+                    transactions.setClientProduct(clientProduct);
+                    transactions.setDate(LocalDateTime.now());
+                    return transactionRepository.save(transactions);
+
+                }).toMaybe();
+
+       /* Maybe<Client> client = clientRepository.getByDocumentNumber(transactionsRequest.getDocumentNumber());
         Single<ClientProduct> clientProduct = clientProductRepository.getByAccountNumber(params.get("account_number").toString());
         String typeTransaction=params.get("type_transaction").toString();
 
@@ -61,11 +87,11 @@ public class TransactionServiceImpl implements TransactionsService {
         }else{
             System.out.println("operacion no soportada");
         }
+        return null;*/
     }
     @Override
-    public Flowable<Transactions> getTransactionsByClientProduct(String name) throws Exception{
-
-        return null;
+    public Flowable<Transactions> getTransactionsByAccountNumber(String accountNumber) throws Exception{
+        return transactionRepository.getByAccountNumber(accountNumber);
     }
     @Override
     public Single<BigDecimal> getBalanceByClientProduct(String account_number) throws Exception{

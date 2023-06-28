@@ -18,11 +18,11 @@ public class Transactions {
     @Id
     private String id;
     private Client client;
+    private String documentNumber;
     private LocalDateTime date;
-    @Field("type_transaction")
     private String typeTransaction;//deposito,retiro,
-    @Field("client_product")
     private ClientProduct clientProduct;
+    private String accountNumber;
     private BigDecimal amount;
     private int state;
 }

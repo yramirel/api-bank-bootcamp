@@ -17,12 +17,11 @@ import java.math.BigDecimal;
 public class ProductRules implements Serializable{
     @Id
     private String id;
-    @Field("type_client")
-    private TypeClient typeClient;
-    private Product product;
-    private Integer max_account;
-    private BigDecimal cost_maintenance;
-    private Integer max_deposits;
-    private Integer max_withdrawal;
+    private int typeClient;
+    private String codeProduct;
+    private Integer maxAccount;
+    private BigDecimal costMaintenance;
+    private Integer maxDeposits;
+    private Integer maxWithdrawal;
     private int state;
 }

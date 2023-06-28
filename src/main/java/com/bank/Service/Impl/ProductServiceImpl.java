@@ -1,9 +1,11 @@
 package com.bank.Service.Impl;
 
+import com.bank.ErrorHandler.ConflictException;
 import com.bank.Model.Client;
 import com.bank.Model.ClientProduct;
 import com.bank.Model.Product;
-import com.bank.Model.TypeClient;
+import com.bank.Model.Request.ClientRequest;
+import com.bank.Model.Request.ProductRequest;
 import com.bank.Repository.ClientProductRepository;
 import com.bank.Repository.ClientRepository;
 import com.bank.Repository.ProductRepository;
@@ -31,23 +33,25 @@ public class ProductServiceImpl implements ProductService {
     public Flowable<Product> listProducts(){
         return  productRepository.listProducts();
     }
-
     @Override
-    public void saveClientProduct(Map params) throws Exception{
-        try {
-            Maybe<Client> client = clientRepository.getByDocumentNumber(params.get("document_number").toString());
-            Single<Product> product = productRepository.getByName(params.get("product_name").toString());
-            ClientProduct clientProduct=ClientProduct.builder()
-                    .client(client.blockingGet())
-                    .product(product.blockingGet())
-                    .creditLimit(BigDecimal.valueOf(Double.valueOf(params.get("credit_limit").toString())))
-                    .balance(BigDecimal.ZERO)
-                    .accountNumber(params.get("account_number").toString())
-                    .date(LocalDateTime.now())
-                    .build();
-            clientProductRepository.save(clientProduct).subscribe();
-        }catch (Exception e){
-            System.out.println(e.getMessage());
-        }
+    public Maybe<Product> saveProduct(ProductRequest productRequest){
+        return productRepository.getByName(productRequest.getName()).isEmpty()
+                .flatMap(isEmpty->{
+                    productRequest.setState(1);
+                    return isEmpty?productRepository.save(productRequest.toProduct())
+                            :Single.error(new ConflictException("Error"));
+                }).toMaybe();
+    }
+    @Override
+    public Maybe<Product> getProduct(String codeProduct) throws Exception{
+        return this.productRepository.getByCodeProduct(codeProduct);
+    }
+    @Override
+    public Maybe<Product> deleteProduct(String codProduct){
+        return productRepository.getByCodeProduct(codProduct).toSingle()
+                .flatMap(product->{
+                    product.setState(0);
+                    return productRepository.save(product);
+                }).toMaybe();
     }
 }

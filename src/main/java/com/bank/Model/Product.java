@@ -14,7 +14,8 @@ import java.io.Serializable;
 public class Product implements Serializable{
     @Id
     private String id;
-    private String type_product;//pasivo,activo
+    private String codeProduct;
+    private String typeProduct;//pasivo,activo
     private String name;
     private int state;
 }
