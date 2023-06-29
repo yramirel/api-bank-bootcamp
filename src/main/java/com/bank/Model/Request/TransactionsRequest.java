@@ -21,6 +21,7 @@ public class TransactionsRequest {
     private ClientProduct clientProduct;
     private String accountNumber;
     private BigDecimal amount;
+    private BigDecimal consumption;
     private int state;
 
     public Transactions toTransactions(){

@@ -21,6 +21,7 @@ public class Transactions {
     private String documentNumber;
     private LocalDateTime date;
     private String typeTransaction;//deposito,retiro,
+    @DocumentReference(lazy = true)
     private ClientProduct clientProduct;
     private String accountNumber;
     private BigDecimal amount;

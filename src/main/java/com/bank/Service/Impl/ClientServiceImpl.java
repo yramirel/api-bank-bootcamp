@@ -22,7 +22,7 @@ public class ClientServiceImpl implements ClientService {
                 .flatMap(isEmpty->{
                     client.setState(1);
                     return isEmpty?clientRepository.save(client.toClient())
-                            :Single.error(new ConflictException("Error"));
+                            :Single.error(new ConflictException("El Cliente ya Existe"));
                 }).toMaybe();
     }
     @Override

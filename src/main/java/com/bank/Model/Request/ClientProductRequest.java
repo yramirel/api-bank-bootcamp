@@ -22,6 +22,7 @@ public class ClientProductRequest {
     private LocalDateTime date;
     private BigDecimal creditLimit;
     private BigDecimal balance;
+    private BigDecimal consumption;
     private int state;
 
     public ClientProduct toClientProduct(){
@@ -35,6 +36,8 @@ public class ClientProductRequest {
              .date(this.date)
              .creditLimit(this.creditLimit)
              .balance(this.balance)
+             .consumption(this.consumption)
+             .state(this.state)
              .build();
     }
 }

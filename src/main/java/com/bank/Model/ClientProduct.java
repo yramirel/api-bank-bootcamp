@@ -26,5 +26,6 @@ public class ClientProduct implements Serializable{
     private LocalDateTime date;
     private BigDecimal creditLimit;
     private BigDecimal balance;
+    private BigDecimal consumption;
     private int state;
 }

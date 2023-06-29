@@ -31,26 +31,33 @@ public class TransactionServiceImpl implements TransactionsService {
         return clientRepository.getByDocumentNumber(transactionsRequest.getDocumentNumber()).toSingle()
                 .flatMap(client -> {
                     ClientProduct clientProduct = clientProductRepository.getByAccountNumber(transactionsRequest.getAccountNumber()).blockingGet();
-                    ProductRules productRules=productRulesRepository.getByCodeProduct(clientProduct.getCodeProduct()).blockingGet();
+                    //ProductRules productRules=productRulesRepository.getByCodeProduct(clientProduct.getCodeProduct()).blockingFirst();
 
                     BigDecimal balance=clientProduct.getBalance();
                     BigDecimal amount=transactionsRequest.getAmount();
+                    BigDecimal consumption=clientProduct.getConsumption();
 
                     if(transactionsRequest.getTypeTransaction().equals("deposito")){
-
+                        balance=balance.add(amount);
                     }else if(transactionsRequest.getTypeTransaction().equals("retiro") && balance.compareTo(amount)==1){
-
-                    }else if(transactionsRequest.getTypeTransaction().equals("consumo") && clientProduct.getCreditLimit().compareTo(amount)==1){
-
-                    }else if(transactionsRequest.getTypeTransaction().equals("pagos")){
-
+                        balance=balance.subtract(amount);
+                    }else if(transactionsRequest.getTypeTransaction().equals("consumo") && clientProduct.getCreditLimit().compareTo(amount.add(consumption))==1){
+                        consumption=consumption.add(amount);
+                    }else if(transactionsRequest.getTypeTransaction().equals("pago")){
+                        consumption=consumption.subtract(amount);
                     }else{
                         return Single.error(new ConflictException("Transaccion no soportada"));
                     }
+
+                    clientProduct.setBalance(balance);
+                    clientProduct.setConsumption(consumption);
+                    clientProductRepository.save(clientProduct).subscribe();
+
                     Transactions transactions= transactionsRequest.toTransactions();
                     transactions.setClient(client);
                     transactions.setClientProduct(clientProduct);
                     transactions.setDate(LocalDateTime.now());
+                    transactions.setState(1);
                     return transactionRepository.save(transactions);
 
                 }).toMaybe();
@@ -95,14 +102,10 @@ public class TransactionServiceImpl implements TransactionsService {
     }
     @Override
     public Single<BigDecimal> getBalanceByClientProduct(String account_number) throws Exception{
-        Flowable<ClientProduct> clientProductSingle=clientProductRepository.listAllClientProduct();
-        clientProductSingle=clientProductSingle.filter(item->{
-            System.out.println(item);
-            return item.getAccountNumber().equals(account_number);
-        });
-        Single<BigDecimal> response=clientProductSingle.map(item->{
-            return Single.just(item.getBalance());
-        }).blockingFirst();
-        return response;
+        return clientProductRepository.getByAccountNumber(account_number)
+                .switchIfEmpty(Single.just(ClientProduct.builder().build()))
+                .flatMap(item->{
+                    return Single.just(item.getBalance());
+                });
     }
 }

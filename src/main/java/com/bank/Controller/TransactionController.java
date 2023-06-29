@@ -31,7 +31,7 @@ public class TransactionController {
         }
         return transactions;
     }
-    @RequestMapping(value ="/balance/{account_number}")
+    @RequestMapping(value ="/balance/{accountNumber}")
     @ResponseStatus(HttpStatus.OK)
     public Single<BigDecimal> getBalanceByClientProduct(@PathVariable(value = "accountNumber") String accountNumber) {
         Single<BigDecimal> balance=Single.just(BigDecimal.ZERO);
