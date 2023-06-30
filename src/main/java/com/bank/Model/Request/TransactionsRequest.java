@@ -20,6 +20,7 @@ public class TransactionsRequest {
     private String typeTransaction;//deposito,retiro,
     private ClientProduct clientProduct;
     private String accountNumber;
+    private String accountNumberReceiver;
     private BigDecimal amount;
     private BigDecimal consumption;
     private int state;
@@ -33,6 +34,7 @@ public class TransactionsRequest {
                 .typeTransaction(this.typeTransaction)
                 .clientProduct(this.clientProduct)
                 .accountNumber(this.accountNumber)
+                .accountNumberReceiver(accountNumberReceiver)
                 .amount(this.amount)
                 .state(this.state)
                 .build();

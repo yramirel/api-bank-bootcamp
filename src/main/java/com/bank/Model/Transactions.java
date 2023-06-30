@@ -24,6 +24,7 @@ public class Transactions {
     @DocumentReference(lazy = true)
     private ClientProduct clientProduct;
     private String accountNumber;
+    private String accountNumberReceiver;
     private BigDecimal amount;
     private int state;
 }

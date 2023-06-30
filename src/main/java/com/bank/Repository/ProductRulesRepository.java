@@ -10,4 +10,5 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface ProductRulesRepository extends ReactiveMongoRepository<ProductRules,String> {
     Flowable<ProductRules> getByCodeProduct(String codeProduct);
+    Flowable<ProductRules> getByCodeProductAndTypeClient(String codeProduct,Integer typeClient);
 }

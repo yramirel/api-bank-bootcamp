@@ -2,6 +2,7 @@ package com.bank.Service.Impl;
 
 import com.bank.ErrorHandler.ConflictException;
 import com.bank.Model.*;
+import com.bank.Model.Request.ClientProductRequest;
 import com.bank.Model.Request.TransactionsRequest;
 import com.bank.Repository.*;
 import com.bank.Service.TransactionsService;
@@ -13,7 +14,9 @@ import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Map;
 
 @Service
@@ -31,70 +34,58 @@ public class TransactionServiceImpl implements TransactionsService {
         return clientRepository.getByDocumentNumber(transactionsRequest.getDocumentNumber()).toSingle()
                 .flatMap(client -> {
                     ClientProduct clientProduct = clientProductRepository.getByAccountNumber(transactionsRequest.getAccountNumber()).blockingGet();
-                    //ProductRules productRules=productRulesRepository.getByCodeProduct(clientProduct.getCodeProduct()).blockingFirst();
+                    Boolean successRules=this.verifyRules(client,clientProduct,transactionsRequest);
+                    if(successRules){
+                        BigDecimal balance=clientProduct.getBalance();
+                        BigDecimal amount=transactionsRequest.getAmount();
+                        BigDecimal consumption=clientProduct.getConsumption();
 
-                    BigDecimal balance=clientProduct.getBalance();
-                    BigDecimal amount=transactionsRequest.getAmount();
-                    BigDecimal consumption=clientProduct.getConsumption();
+                        if(transactionsRequest.getTypeTransaction().equals("deposito")){
+                            balance=balance.add(amount);
+                        }else if(transactionsRequest.getTypeTransaction().equals("retiro") && balance.compareTo(amount)==1){
+                            balance=balance.subtract(amount);
+                        }else if(transactionsRequest.getTypeTransaction().equals("consumo") && clientProduct.getCreditLimit().compareTo(amount.add(consumption))==1){
+                            consumption=consumption.add(amount);
+                        }else if(transactionsRequest.getTypeTransaction().equals("pago")){
+                            consumption=consumption.subtract(amount);
+                        }else if(transactionsRequest.getTypeTransaction().equals("transferencia") && balance.compareTo(amount)==1){
+                            balance=balance.subtract(amount);
+                            ClientProduct clientProductReceiver = clientProductRepository.getByAccountNumber(transactionsRequest.getAccountNumberReceiver()).blockingGet();
+                            clientProductReceiver.setBalance(clientProductReceiver.getBalance().add(amount));
+                            clientProductRepository.save(clientProductReceiver).subscribe();
+                        }else{
+                            return Single.error(new ConflictException("Transaccion no soportada"));
+                        }
 
-                    if(transactionsRequest.getTypeTransaction().equals("deposito")){
-                        balance=balance.add(amount);
-                    }else if(transactionsRequest.getTypeTransaction().equals("retiro") && balance.compareTo(amount)==1){
-                        balance=balance.subtract(amount);
-                    }else if(transactionsRequest.getTypeTransaction().equals("consumo") && clientProduct.getCreditLimit().compareTo(amount.add(consumption))==1){
-                        consumption=consumption.add(amount);
-                    }else if(transactionsRequest.getTypeTransaction().equals("pago")){
-                        consumption=consumption.subtract(amount);
+                        clientProduct.setBalance(balance);
+                        clientProduct.setConsumption(consumption);
+                        clientProductRepository.save(clientProduct).subscribe();
+
+                        Transactions transactions= transactionsRequest.toTransactions();
+                        transactions.setClient(client);
+                        transactions.setClientProduct(clientProduct);
+                        transactions.setDate(LocalDateTime.now());
+                        transactions.setState(1);
+                        return transactionRepository.save(transactions);
                     }else{
-                        return Single.error(new ConflictException("Transaccion no soportada"));
+                        return Single.error(new ConflictException("El ciente no cumple con las Reglas de Negocio"));
                     }
-
-                    clientProduct.setBalance(balance);
-                    clientProduct.setConsumption(consumption);
-                    clientProductRepository.save(clientProduct).subscribe();
-
-                    Transactions transactions= transactionsRequest.toTransactions();
-                    transactions.setClient(client);
-                    transactions.setClientProduct(clientProduct);
-                    transactions.setDate(LocalDateTime.now());
-                    transactions.setState(1);
-                    return transactionRepository.save(transactions);
-
                 }).toMaybe();
+    }
+    public Boolean verifyRules(Client client, ClientProduct clientProduct,TransactionsRequest transactionsRequest){
+        Boolean successRules=true;
+        ProductRules productRules=null;
+        Flowable<ProductRules> productRulesFlowable=productRulesRepository.getByCodeProduct(clientProduct.getCodeProduct())
+                .filter(item->item.getTypeClient()==client.getTypeClient());
+        Long totalTransactions=transactionRepository.getByAccountNumberAndDateBetween(transactionsRequest.getAccountNumber(), LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0), LocalDate.now().plusMonths(1).withDayOfMonth(1).minusDays(1).atTime(LocalTime.MAX)).count().blockingGet();
 
-       /* Maybe<Client> client = clientRepository.getByDocumentNumber(transactionsRequest.getDocumentNumber());
-        Single<ClientProduct> clientProduct = clientProductRepository.getByAccountNumber(params.get("account_number").toString());
-        String typeTransaction=params.get("type_transaction").toString();
-
-        ClientProduct clientProductUpdate=clientProduct.blockingGet();
-
-
-        BigDecimal balance=clientProductUpdate.getBalance();
-        BigDecimal amount=BigDecimal.valueOf(Double.parseDouble(params.get("amount").toString()));
-        if(typeTransaction.equals("deposito")){
-            Transactions transactions= Transactions.builder()
-                    .client(client.blockingGet())
-                    .clientProduct(clientProductUpdate)
-                    .amount(amount)
-                    .build();
-            transactionRepository.save(transactions).subscribe();
-
-            clientProductUpdate.setBalance(balance.add(amount));
-            clientProductRepository.save(clientProductUpdate).subscribe();
-        }else if(typeTransaction.equals("retiro") && balance.compareTo(amount)==1){
-            Transactions transactions= Transactions.builder()
-                    .client(client.blockingGet())
-                    .clientProduct(clientProduct.blockingGet())
-                    .amount(amount)
-                    .build();
-            transactionRepository.save(transactions).subscribe();
-
-            clientProductUpdate.setBalance(balance.subtract(amount));
-            clientProductRepository.save(clientProductUpdate).subscribe();
-        }else{
-            System.out.println("operacion no soportada");
+        if(!productRulesFlowable.isEmpty().blockingGet()){
+            productRules=productRulesFlowable.blockingFirst();
         }
-        return null;*/
+        if(productRules!=null){
+            successRules=productRules.getMaxDeposits()==-1?true:(productRules.getMaxDeposits()>=totalTransactions.intValue()?true:false);
+        }
+        return successRules;
     }
     @Override
     public Flowable<Transactions> getTransactionsByAccountNumber(String accountNumber) throws Exception{
