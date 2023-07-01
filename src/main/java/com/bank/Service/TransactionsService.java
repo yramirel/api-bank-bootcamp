@@ -14,4 +14,5 @@ public interface TransactionsService {
    public Maybe<Transactions> saveTransaction(TransactionsRequest transactionsRequest) throws Exception;
    public Flowable<Transactions> getTransactionsByAccountNumber(String name) throws Exception;
    public Single<BigDecimal> getBalanceByClientProduct(String account_number) throws Exception;
+   public Flowable<Transactions> getByCommisionsByAccountNumberAndDate(String accountNumber) throws Exception;
 }

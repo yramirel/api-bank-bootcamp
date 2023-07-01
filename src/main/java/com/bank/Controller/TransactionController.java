@@ -63,4 +63,14 @@ public class TransactionController {
         }
         return transactions;
     }
+    @RequestMapping(value ="/comission/{accountNumber}" , produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    public Flowable<Transactions> getByCommisionsByAccountNumberAndDate(@PathVariable(value = "accountNumber") String accountNumber) {
+        Flowable<Transactions> transactions=null;
+        try {
+            transactions= transactionService.getByCommisionsByAccountNumberAndDate(accountNumber);
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+        return transactions;
+    }
 }

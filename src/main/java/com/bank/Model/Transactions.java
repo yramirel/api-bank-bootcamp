@@ -26,5 +26,6 @@ public class Transactions {
     private String accountNumber;
     private String accountNumberReceiver;
     private BigDecimal amount;
+    private BigDecimal comission;
     private int state;
 }

@@ -35,15 +35,18 @@ public class TransactionServiceImpl implements TransactionsService {
                 .flatMap(client -> {
                     ClientProduct clientProduct = clientProductRepository.getByAccountNumber(transactionsRequest.getAccountNumber()).blockingGet();
                     Boolean successRules=this.verifyRules(client,clientProduct,transactionsRequest);
-                    if(successRules){
+                    double comission=0;
+                        if(!successRules){
+                            comission=transactionsRequest.getAmount().floatValue()*0.015;
+                        }
                         BigDecimal balance=clientProduct.getBalance();
                         BigDecimal amount=transactionsRequest.getAmount();
                         BigDecimal consumption=clientProduct.getConsumption();
-
                         if(transactionsRequest.getTypeTransaction().equals("deposito")){
+                            amount=amount.subtract(BigDecimal.valueOf(comission));
                             balance=balance.add(amount);
-                        }else if(transactionsRequest.getTypeTransaction().equals("retiro") && balance.compareTo(amount)==1){
-                            balance=balance.subtract(amount);
+                        }else if(transactionsRequest.getTypeTransaction().equals("retiro") && balance.compareTo(amount.add(BigDecimal.valueOf(comission)))==1){
+                            balance=balance.subtract(amount.add(BigDecimal.valueOf(comission)));
                         }else if(transactionsRequest.getTypeTransaction().equals("consumo") && clientProduct.getCreditLimit().compareTo(amount.add(consumption))==1){
                             consumption=consumption.add(amount);
                         }else if(transactionsRequest.getTypeTransaction().equals("pago")){
@@ -63,33 +66,37 @@ public class TransactionServiceImpl implements TransactionsService {
 
                         Transactions transactions= transactionsRequest.toTransactions();
                         transactions.setClient(client);
+                        transactions.setComission(BigDecimal.valueOf(comission));
                         transactions.setClientProduct(clientProduct);
                         transactions.setDate(LocalDateTime.now());
                         transactions.setState(1);
                         return transactionRepository.save(transactions);
-                    }else{
-                        return Single.error(new ConflictException("El ciente no cumple con las Reglas de Negocio"));
-                    }
                 }).toMaybe();
     }
     public Boolean verifyRules(Client client, ClientProduct clientProduct,TransactionsRequest transactionsRequest){
         Boolean successRules=true;
         ProductRules productRules=null;
+        String typeTransaction=transactionsRequest.getTypeTransaction();
         Flowable<ProductRules> productRulesFlowable=productRulesRepository.getByCodeProduct(clientProduct.getCodeProduct())
                 .filter(item->item.getTypeClient()==client.getTypeClient());
-        Long totalTransactions=transactionRepository.getByAccountNumberAndDateBetween(transactionsRequest.getAccountNumber(), LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0), LocalDate.now().plusMonths(1).withDayOfMonth(1).minusDays(1).atTime(LocalTime.MAX)).count().blockingGet();
+        Long totalTransactions=transactionRepository.getByAccountNumberAndTypeTransactionAndDateBetween(transactionsRequest.getAccountNumber(),typeTransaction, LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0), LocalDate.now().plusMonths(1).withDayOfMonth(1).minusDays(1).atTime(LocalTime.MAX)).count().blockingGet();
 
         if(!productRulesFlowable.isEmpty().blockingGet()){
             productRules=productRulesFlowable.blockingFirst();
         }
         if(productRules!=null){
-            successRules=productRules.getMaxDeposits()==-1?true:(productRules.getMaxDeposits()>=totalTransactions.intValue()?true:false);
+            Integer maxTransaction= typeTransaction.equals("deposito")?productRules.getMaxDeposits():(typeTransaction.equals("retiro")?productRules.getMaxWithdrawal():-1);
+            successRules=maxTransaction==-1?true:(maxTransaction>=totalTransactions.intValue()?true:false);
         }
         return successRules;
     }
     @Override
     public Flowable<Transactions> getTransactionsByAccountNumber(String accountNumber) throws Exception{
         return transactionRepository.getByAccountNumber(accountNumber);
+    }
+    @Override
+    public Flowable<Transactions> getByCommisionsByAccountNumberAndDate(String accountNumber) throws Exception{
+        return transactionRepository.getByCommisionsByAccountNumberAndDate(accountNumber, LocalDateTime.now().withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0).withNano(0), LocalDate.now().plusMonths(1).withDayOfMonth(1).minusDays(1).atTime(LocalTime.MAX));
     }
     @Override
     public Single<BigDecimal> getBalanceByClientProduct(String account_number) throws Exception{
