@@ -60,6 +60,20 @@ public class ClientProductServiceImpl implements ClientProductService {
         }
         if(productRules!=null){
             successRules=productRules.getMaxAccount()==-1?true:(productRules.getMaxAccount()>=numberAccountCreated.intValue()?false:false);
+            if(clientProductRequest.getCodeProduct().equals("cuentacorrientepyme") || clientProductRequest.getCodeProduct().equals("ahorrovip")){
+                successRules=this.verifyRulesAdditionals(client,clientProductRequest,productRules);
+            }
+        }
+        return successRules;
+    }
+    public Boolean verifyRulesAdditionals(Client client,ClientProductRequest clientProductRequest,ProductRules productRules){
+        Boolean successRules=true;
+        Long numberCreditCard=clientProductRepository.getByDocumentNumberAndCodeProduct(client.getDocumentNumber(),"tarjetacredito").count().blockingGet();
+        if(clientProductRequest.getCodeProduct().equals("cuentacorrientepyme")){
+            Long numberCorrientAccount=clientProductRepository.getByDocumentNumberAndCodeProduct(client.getDocumentNumber(),"cuentacorriente").count().blockingGet();
+            successRules=numberCorrientAccount>=1 && numberCreditCard>=1?true:false;
+        }else{
+            successRules=numberCreditCard>=1?true:false;
         }
         return successRules;
     }
