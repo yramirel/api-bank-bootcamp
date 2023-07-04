@@ -1,8 +1,6 @@
 package com.bank.Controller;
 
-import com.bank.Model.Client;
 import com.bank.Model.Product;
-import com.bank.Model.Request.ClientRequest;
 import com.bank.Model.Request.ProductRequest;
 import com.bank.Service.ProductRulesService;
 import com.bank.Service.ProductService;
@@ -12,9 +10,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import reactor.core.publisher.Flux;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/")

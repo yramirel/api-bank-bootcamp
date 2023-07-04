@@ -1,10 +1,7 @@
 package com.bank.Service.Impl;
 
 import com.bank.ErrorHandler.ConflictException;
-import com.bank.Model.Client;
-import com.bank.Model.ClientProduct;
-import com.bank.Model.Product;
-import com.bank.Model.ProductRules;
+import com.bank.Model.*;
 import com.bank.Model.Request.ClientProductRequest;
 import com.bank.Repository.ClientProductRepository;
 import com.bank.Repository.ClientRepository;
@@ -76,5 +73,9 @@ public class ClientProductServiceImpl implements ClientProductService {
             successRules=numberCreditCard>=1?true:false;
         }
         return successRules;
+    }
+    @Override
+    public Flowable<ClientProduct> getClientProductByDocumentNumber(String documentNumber) throws Exception{
+        return clientProductRepository.getByDocumentNumber(documentNumber);
     }
 }

@@ -1,13 +1,9 @@
 package com.bank.Model.Request;
 
-import com.bank.Model.Client;
 import com.bank.Model.Product;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
-
-import java.io.Serializable;
 
 @AllArgsConstructor
 @Data

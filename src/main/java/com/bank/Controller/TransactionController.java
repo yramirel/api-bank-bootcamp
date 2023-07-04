@@ -1,6 +1,5 @@
 package com.bank.Controller;
 
-import com.bank.Model.Client;
 import com.bank.Model.Request.TransactionsRequest;
 import com.bank.Model.Transactions;
 import com.bank.Service.TransactionsService;
@@ -13,7 +12,6 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
-import java.util.Map;
 
 @RestController
 @RequestMapping("/")

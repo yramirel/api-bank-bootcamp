@@ -2,7 +2,6 @@ package com.bank.Service.Impl;
 
 import com.bank.ErrorHandler.ConflictException;
 import com.bank.Model.*;
-import com.bank.Model.Request.ClientProductRequest;
 import com.bank.Model.Request.TransactionsRequest;
 import com.bank.Repository.*;
 import com.bank.Service.TransactionsService;
@@ -10,14 +9,12 @@ import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Single;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoOperations;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Map;
 
 @Service
 public class TransactionServiceImpl implements TransactionsService {
@@ -29,6 +26,9 @@ public class TransactionServiceImpl implements TransactionsService {
     private ClientProductRepository clientProductRepository;
     @Autowired
     private ProductRulesRepository productRulesRepository;
+
+    @Autowired
+    private BankDebsRepository bankDebsRepository;
     @Override
     public Maybe<Transactions> saveTransaction(TransactionsRequest transactionsRequest) throws Exception{
         return clientRepository.getByDocumentNumber(transactionsRequest.getDocumentNumber()).toSingle()
@@ -48,6 +48,34 @@ public class TransactionServiceImpl implements TransactionsService {
                         }else if(transactionsRequest.getTypeTransaction().equals("retiro") && balance.compareTo(amount.add(BigDecimal.valueOf(comission)))==1){
                             balance=balance.subtract(amount.add(BigDecimal.valueOf(comission)));
                         }else if(transactionsRequest.getTypeTransaction().equals("consumo") && clientProduct.getCreditLimit().compareTo(amount.add(consumption))==1){
+                            Integer cutoffDay=clientProduct.getCutoffDay();
+                            LocalDateTime startDate=null;
+                            LocalDateTime cutoffDate=null;
+                            if(cutoffDay>=LocalDateTime.now().getDayOfMonth()){
+                                startDate=LocalDateTime.now().minusMonths(1).withDayOfMonth(cutoffDay+1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+                                cutoffDate=LocalDate.now().withDayOfMonth(cutoffDay-1).atTime(LocalTime.MAX);
+                            }else{
+                                startDate=LocalDateTime.now().withDayOfMonth(cutoffDay+1).withHour(0).withMinute(0).withSecond(0).withNano(0);
+                                cutoffDate=LocalDate.now().plusMonths(1).withDayOfMonth(cutoffDay-1).atTime(LocalTime.MAX);
+                            }
+
+                            BankDebs bankDebs = bankDebsRepository.getByAccountNumberAndStartDateAndCutoffDate(transactionsRequest.getAccountNumber(),startDate,cutoffDate)
+                                    .switchIfEmpty(Flowable.just(BankDebs.builder().build()))
+                                    .blockingFirst();
+                            if(bankDebs.getId()==null){
+                                bankDebs=BankDebs.builder().build();
+                                bankDebs.setAccountNumber(transactionsRequest.getAccountNumber());
+                                bankDebs.setDocumentNumber(client.getDocumentNumber());
+                                bankDebs.setStartDate(startDate);
+                                bankDebs.setCutoffDate(cutoffDate);
+                                bankDebs.setExpirationDate(cutoffDate.plusDays(20));
+                                bankDebs.setClientProduct(clientProduct);
+                                bankDebs.setClient(client);
+                                bankDebs.setAmount(BigDecimal.ZERO);
+                                bankDebs.setState(1);
+                            }
+                            bankDebs.setAmount(bankDebs.getAmount().add(amount));
+                            bankDebsRepository.save(bankDebs).subscribe();
                             consumption=consumption.add(amount);
                         }else if(transactionsRequest.getTypeTransaction().equals("pago")){
                             consumption=consumption.subtract(amount);

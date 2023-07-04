@@ -1,10 +1,7 @@
 package com.bank.Service.Impl;
 
 import com.bank.ErrorHandler.ConflictException;
-import com.bank.Model.Client;
-import com.bank.Model.ClientProduct;
 import com.bank.Model.Product;
-import com.bank.Model.Request.ClientRequest;
 import com.bank.Model.Request.ProductRequest;
 import com.bank.Repository.ClientProductRepository;
 import com.bank.Repository.ClientRepository;
@@ -16,9 +13,6 @@ import io.reactivex.rxjava3.core.Single;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigDecimal;
-import java.time.LocalDateTime;
-import java.util.Map;
 
 @Service
 public class ProductServiceImpl implements ProductService {

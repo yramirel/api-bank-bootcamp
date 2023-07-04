@@ -20,6 +20,7 @@ public class ClientProductRequest {
     private String documentNumber;
     private String accountNumber;
     private LocalDateTime date;
+    private Integer cutoffDay;
     private BigDecimal creditLimit;
     private BigDecimal balance;
     private BigDecimal consumption;
@@ -37,6 +38,7 @@ public class ClientProductRequest {
              .creditLimit(this.creditLimit)
              .balance(this.balance)
              .consumption(this.consumption)
+             .cutoffDay(this.cutoffDay)
              .state(this.state)
              .build();
     }
