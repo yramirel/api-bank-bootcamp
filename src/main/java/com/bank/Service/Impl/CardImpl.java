@@ -43,6 +43,7 @@ public class CardImpl implements CardService {
                     List<ClientProduct> associatedAccounts = card.getAssociatedAccounts();
                     associatedAccounts=associatedAccounts==null?new ArrayList<>():associatedAccounts;
                     associatedAccounts.add(clientProduct);
+                    card.setAssociatedAccounts(associatedAccounts);
                     cardRepository.save(card).subscribe();
                     return Maybe.just(card);
                 });
