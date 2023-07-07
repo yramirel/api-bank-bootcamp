@@ -56,7 +56,7 @@ public class ClientProductServiceImpl implements ClientProductService {
             productRules=productRulesFlowable.blockingFirst();
         }
         if(productRules!=null){
-            successRules=productRules.getMaxAccount()==-1?true:(productRules.getMaxAccount()>=numberAccountCreated.intValue()?false:false);
+            successRules=productRules.getMaxAccount()==-1 || (productRules.getMaxAccount()>=numberAccountCreated.intValue()?false:true);
             if(clientProductRequest.getCodeProduct().equals("cuentacorrientepyme") || clientProductRequest.getCodeProduct().equals("ahorrovip")){
                 successRules=this.verifyRulesAdditionals(client,clientProductRequest,productRules);
             }
@@ -68,7 +68,7 @@ public class ClientProductServiceImpl implements ClientProductService {
         Long numberCreditCard=clientProductRepository.getByDocumentNumberAndCodeProduct(client.getDocumentNumber(),"tarjetacredito").count().blockingGet();
         if(clientProductRequest.getCodeProduct().equals("cuentacorrientepyme")){
             Long numberCorrientAccount=clientProductRepository.getByDocumentNumberAndCodeProduct(client.getDocumentNumber(),"cuentacorriente").count().blockingGet();
-            successRules=numberCorrientAccount>=1 && numberCreditCard>=1?true:false;
+            successRules=(numberCorrientAccount>=1 && numberCreditCard>=1)?true:false;
         }else{
             successRules=numberCreditCard>=1?true:false;
         }

@@ -1,7 +1,6 @@
 package com.bank.Controller;
 
 import com.bank.Model.Card;
-import com.bank.Model.ClientProduct;
 import com.bank.Model.Request.CardRequest;
 import com.bank.Model.Request.ClientProductRequest;
 import com.bank.Service.CardService;
