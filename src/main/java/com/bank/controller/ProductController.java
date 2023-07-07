@@ -35,7 +35,7 @@ public class ProductController {
    *
    * @return ,
    */
-  @RequestMapping(value = "/products", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+  @GetMapping(value = "/products", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
   @ResponseStatus(HttpStatus.OK)
   public Flowable<Product> listProducts() {
     Flowable<Product> products = null;
@@ -92,7 +92,7 @@ public class ProductController {
   /**
    * saveProductRules method.
    */
-  @RequestMapping(value = "/saveProductRules", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+  @PostMapping(value = "/saveProductRules", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
   @ResponseStatus(HttpStatus.CREATED)
   public void saveProductRules() {
 

@@ -10,12 +10,7 @@ import java.math.BigDecimal;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * TransactionController class.
@@ -31,7 +26,7 @@ public class TransactionController {
    *
    * @return ,
    */
-  @RequestMapping(value = "/transactions", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+  @GetMapping(value = "/transactions", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
   public Flowable<Transactions> listTransactions() {
     Flowable<Transactions> transactions = null;
     try {
@@ -48,7 +43,7 @@ public class TransactionController {
    * @param accountNumber ,
    * @return ,
    */
-  @RequestMapping(value = "/balance/{accountNumber}")
+  @GetMapping(value = "/balance/{accountNumber}")
   @ResponseStatus(HttpStatus.OK)
   public Single<BigDecimal> getBalanceByClientProduct(@PathVariable(value = "accountNumber")
                                                       String accountNumber) {
@@ -85,7 +80,7 @@ public class TransactionController {
    * @param accountNumber ,
    * @return ,
    */
-  @RequestMapping(value = "/transactions/{accountNumber}",
+  @GetMapping(value = "/transactions/{accountNumber}",
       produces = MediaType.TEXT_EVENT_STREAM_VALUE)
   public Flowable<Transactions> listTransactionsByAccountNumber(
       @PathVariable(value = "accountNumber") String accountNumber) {
@@ -104,7 +99,7 @@ public class TransactionController {
    * @param accountNumber ,
    * @return ,
    */
-  @RequestMapping(value = "/comission/{accountNumber}",
+  @GetMapping(value = "/comission/{accountNumber}",
       produces = MediaType.TEXT_EVENT_STREAM_VALUE)
   public Flowable<Transactions> getByCommisionsByAccountNumberAndDate(
       @PathVariable(value = "accountNumber") String accountNumber) {

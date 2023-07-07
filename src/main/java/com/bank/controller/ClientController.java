@@ -73,7 +73,7 @@ public class ClientController {
    *
    * @return ,
    */
-  @RequestMapping(value = "/clients", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+  @GetMapping(value = "/clients", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
   @ResponseStatus(HttpStatus.OK)
   public Flowable<Client> listCient() {
     Flowable<Client> client = null;

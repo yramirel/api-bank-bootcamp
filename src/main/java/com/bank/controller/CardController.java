@@ -81,7 +81,7 @@ public class CardController {
    *
    * @return ,
    */
-  @RequestMapping(value = "/cards", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+  @GetMapping(value = "/cards", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
   @ResponseStatus(HttpStatus.OK)
   public Flowable<Card> listCient() {
     Flowable<Card> card = null;
